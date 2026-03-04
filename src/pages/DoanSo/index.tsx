@@ -71,7 +71,7 @@ const DoanSo: React.FC = () => {
 			borderRadius: '0px',
 			boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
 			textAlign: 'center',
-			borderTop: '5px solid #D93523', // Thêm viền màu chủ đạo
+			borderTop: '5px solid #D93523',
 		},
 		title: { fontSize: '24px', fontWeight: '700', color: '#2c3e50', marginBottom: '10px' },
 		badge: {
@@ -81,7 +81,7 @@ const DoanSo: React.FC = () => {
 			backgroundColor: '#fdeaea',
 			fontSize: '14px',
 			color: '#D93523',
-			marginBottom: '20px', // Màu đỏ #D93523
+			marginBottom: '20px',
 		},
 		messageBox: {
 			padding: '15px',
@@ -123,7 +123,7 @@ const DoanSo: React.FC = () => {
 			backgroundColor: '#D93523',
 			color: '#fff',
 			fontSize: '16px',
-			fontWeight: '600', // Nút màu #D93523
+			fontWeight: '600',
 			cursor: 'pointer',
 			transition: 'background 0.2s',
 		},

@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from 'react';
 
-// 1. Định nghĩa Interface cho dữ liệu
 interface Session {
 	id: string;
 	subject: string;
 	dateTime: string;
-	duration: number; // đơn vị: phút
+	duration: number;
 	content: string;
 }
 
 const QuanLyHocTap: React.FC = () => {
-	// --- STATES ---
 	const [subjects, setSubjects] = useState<string[]>(['Toán', 'Văn', 'Anh', 'Khoa học', 'Công nghệ']);
 	const [sessions, setSessions] = useState<Session[]>([]);
-	const [monthlyGoal, setMonthlyGoal] = useState<number>(40); // Mục tiêu tổng giờ học
-	const [view, setView] = useState<'progress' | 'subjects' | 'goals'>('progress');
+	const [monthlyGoal, setMonthlyGoal] = useState<number>(40);
+	const [view, setView] = useState<'subjects' | 'progress' | 'goals'>('subjects');
 
-	// Form states
-	const [newSession, setNewSession] = useState({ subject: '', dateTime: '', duration: '', content: '' });
+	const [newSession, setNewSession] = useState({
+		subject: '',
+		dateTime: '',
+		duration: '',
+		content: '',
+	});
 	const [newSubName, setNewSubName] = useState('');
+	const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+	const [editingSubIndex, setEditingSubIndex] = useState<number | null>(null);
 
-	// --- LOCAL STORAGE (Đồng bộ dữ liệu) ---
 	useEffect(() => {
 		const savedSubjects = localStorage.getItem('subjects');
 		const savedSessions = localStorage.getItem('sessions');
@@ -37,26 +40,62 @@ const QuanLyHocTap: React.FC = () => {
 		localStorage.setItem('monthlyGoal', JSON.stringify(monthlyGoal));
 	}, [subjects, sessions, monthlyGoal]);
 
-	// --- LOGIC XỬ LÝ ---
 	const handleAddSession = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!newSession.subject || !newSession.duration) return;
-		const session: Session = {
-			id: Date.now().toString(),
-			subject: newSession.subject,
-			dateTime: newSession.dateTime,
-			duration: parseInt(newSession.duration),
-			content: newSession.content,
-		};
-		setSessions([session, ...sessions]);
+
+		if (editingSessionId) {
+			setSessions(
+				sessions.map((s) =>
+					s.id === editingSessionId ? { ...s, ...newSession, duration: parseInt(newSession.duration, 10) } : s,
+				),
+			);
+			setEditingSessionId(null);
+		} else {
+			const session: Session = {
+				id: Date.now().toString(),
+				subject: newSession.subject,
+				dateTime: newSession.dateTime,
+				duration: parseInt(newSession.duration, 10),
+				content: newSession.content,
+			};
+			setSessions([session, ...sessions]);
+		}
 		setNewSession({ subject: '', dateTime: '', duration: '', content: '' });
+	};
+
+	const handleEditSession = (session: Session) => {
+		setEditingSessionId(session.id);
+		setNewSession({
+			subject: session.subject,
+			dateTime: session.dateTime,
+			duration: session.duration.toString(),
+			content: session.content,
+		});
+	};
+
+	const handleAddOrUpdateSubject = () => {
+		if (!newSubName) return;
+		if (editingSubIndex !== null) {
+			const updatedSubjects = [...subjects];
+			updatedSubjects[editingSubIndex] = newSubName;
+			setSubjects(updatedSubjects);
+			setEditingSubIndex(null);
+		} else if (!subjects.includes(newSubName)) {
+			setSubjects([...subjects, newSubName]);
+		}
+		setNewSubName('');
+	};
+
+	const handleEditSubject = (index: number) => {
+		setEditingSubIndex(index);
+		setNewSubName(subjects[index]);
 	};
 
 	const totalHours = (sessions.reduce((sum, s) => sum + s.duration, 0) / 60).toFixed(1);
 	const isGoalAchieved = parseFloat(totalHours) >= monthlyGoal;
 
-	// --- HỆ THỐNG STYLES (Đỏ #D93523, Góc vuông 0px) ---
-	const styles: { [key: string]: React.CSSProperties } = {
+	const styles: Record<string, React.CSSProperties> = {
 		wrapper: { padding: '24px', backgroundColor: '#f0f2f5', minHeight: '100vh' },
 		card: {
 			backgroundColor: '#fff',
@@ -66,15 +105,6 @@ const QuanLyHocTap: React.FC = () => {
 			boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
 		},
 		navBar: { display: 'flex', marginBottom: '20px', borderBottom: '1px solid #ddd' },
-		navTab: (active: boolean) => ({
-			padding: '10px 20px',
-			cursor: 'pointer',
-			borderRadius: '0px',
-			border: 'none',
-			backgroundColor: active ? '#D93523' : 'transparent',
-			color: active ? '#fff' : '#666',
-			fontWeight: 'bold',
-		}),
 		input: {
 			width: '100%',
 			padding: '10px',
@@ -92,6 +122,16 @@ const QuanLyHocTap: React.FC = () => {
 			borderRadius: '0px',
 			fontWeight: '600',
 		},
+		btnSecondary: {
+			backgroundColor: '#595959',
+			color: '#fff',
+			border: 'none',
+			padding: '10px 20px',
+			cursor: 'pointer',
+			borderRadius: '0px',
+			fontWeight: '600',
+			marginLeft: '5px',
+		},
 		table: { width: '100%', borderCollapse: 'collapse', marginTop: '20px' },
 		th: { borderBottom: '2px solid #f0f0f0', padding: '12px', textAlign: 'left', color: '#D93523' },
 		td: { borderBottom: '1px solid #f0f0f0', padding: '12px' },
@@ -102,35 +142,101 @@ const QuanLyHocTap: React.FC = () => {
 			backgroundColor: isGoalAchieved ? '#f6ffed' : '#fff1f0',
 			border: `1px solid ${isGoalAchieved ? '#b7eb8f' : '#ffa39e'}`,
 			color: isGoalAchieved ? '#389e0d' : '#cf1322',
+			borderRadius: '0px',
+		},
+		actionBtn: {
+			border: 'none',
+			background: 'none',
+			cursor: 'pointer',
+			fontWeight: 'bold',
+			marginRight: '10px',
 		},
 	};
 
 	return (
 		<div style={styles.wrapper}>
 			<div style={styles.card}>
-				<h2 style={{ color: '#262626', marginBottom: '20px' }}>HỆ THỐNG QUẢN LÝ HỌC TẬP</h2>
+				<h2 style={{ color: '#262626', marginBottom: '20px', fontWeight: 'bold' }}>QUẢN LÝ TIẾN ĐỘ HỌC TẬP</h2>
 
-				{/* Navigation */}
 				<div style={styles.navBar}>
-					<button style={styles.navTab(view === 'progress')} onClick={() => setView('progress')}>
-						TIẾN ĐỘ
-					</button>
-					<button style={styles.navTab(view === 'subjects')} onClick={() => setView('subjects')}>
-						MÔN HỌC
-					</button>
-					<button style={styles.navTab(view === 'goals')} onClick={() => setView('goals')}>
-						MỤC TIÊU
-					</button>
+					{(['subjects', 'progress', 'goals'] as const).map((t) => (
+						<button
+							key={t}
+							onClick={() => setView(t)}
+							style={{
+								padding: '10px 20px',
+								cursor: 'pointer',
+								borderRadius: '0px',
+								border: 'none',
+								backgroundColor: view === t ? '#D93523' : 'transparent',
+								color: view === t ? '#fff' : '#666',
+								fontWeight: 'bold',
+								textTransform: 'uppercase',
+							}}
+						>
+							{t === 'subjects' ? 'Danh mục môn học' : t === 'progress' ? 'Tiến độ học tập' : 'Mục tiêu học tập'}
+						</button>
+					))}
 				</div>
 
-				{/* View: Tiến độ học tập */}
+				{view === 'subjects' && (
+					<div>
+						<div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+							<input
+								style={styles.input}
+								placeholder='Tên môn học...'
+								value={newSubName}
+								onChange={(e) => setNewSubName(e.target.value)}
+							/>
+							<button style={styles.btnPrimary} onClick={handleAddOrUpdateSubject}>
+								{editingSubIndex !== null ? 'CẬP NHẬT' : 'THÊM'}
+							</button>
+							{editingSubIndex !== null && (
+								<button
+									style={styles.btnSecondary}
+									onClick={() => {
+										setEditingSubIndex(null);
+										setNewSubName('');
+									}}
+								>
+									HỦY
+								</button>
+							)}
+						</div>
+						{subjects.map((s, index) => (
+							<div
+								key={s}
+								style={{
+									padding: '12px',
+									borderBottom: '1px solid #eee',
+									display: 'flex',
+									justifyContent: 'space-between',
+								}}
+							>
+								<span>{s}</span>
+								<div>
+									<button style={{ ...styles.actionBtn, color: '#1890ff' }} onClick={() => handleEditSubject(index)}>
+										Sửa
+									</button>
+									<button
+										style={{ ...styles.actionBtn, color: '#D93523' }}
+										onClick={() => setSubjects(subjects.filter((x) => x !== s))}
+									>
+										Xóa
+									</button>
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+
 				{view === 'progress' && (
 					<div>
 						<form
 							onSubmit={handleAddSession}
 							style={{ backgroundColor: '#fafafa', padding: '20px', border: '1px solid #eee' }}
 						>
-							<h4 style={{ marginTop: 0 }}>Ghi nhận buổi học mới</h4>
+							<h4 style={{ marginTop: 0 }}>{editingSessionId ? 'Chỉnh sửa buổi học' : 'Ghi nhận buổi học mới'}</h4>
 							<select
 								style={styles.input}
 								value={newSession.subject}
@@ -163,8 +269,20 @@ const QuanLyHocTap: React.FC = () => {
 								onChange={(e) => setNewSession({ ...newSession, content: e.target.value })}
 							/>
 							<button type='submit' style={styles.btnPrimary}>
-								LƯU THÔNG TIN
+								{editingSessionId ? 'CẬP NHẬT THÔNG TIN' : 'LƯU THÔNG TIN'}
 							</button>
+							{editingSessionId && (
+								<button
+									type='button'
+									style={styles.btnSecondary}
+									onClick={() => {
+										setEditingSessionId(null);
+										setNewSession({ subject: '', dateTime: '', duration: '', content: '' });
+									}}
+								>
+									HỦY
+								</button>
+							)}
 						</form>
 
 						<table style={styles.table}>
@@ -173,6 +291,7 @@ const QuanLyHocTap: React.FC = () => {
 									<th style={styles.th}>Môn học</th>
 									<th style={styles.th}>Thời gian</th>
 									<th style={styles.th}>Thời lượng</th>
+									<th style={styles.th}>Nội dung</th> {/* Thêm tiêu đề cột Nội dung */}
 									<th style={styles.th}>Hành động</th>
 								</tr>
 							</thead>
@@ -182,10 +301,14 @@ const QuanLyHocTap: React.FC = () => {
 										<td style={styles.td}>{s.subject}</td>
 										<td style={styles.td}>{s.dateTime.replace('T', ' ')}</td>
 										<td style={styles.td}>{s.duration} phút</td>
+										<td style={styles.td}>{s.content}</td> {/* Hiển thị dữ liệu nội dung */}
 										<td style={styles.td}>
+											<button style={{ ...styles.actionBtn, color: '#1890ff' }} onClick={() => handleEditSession(s)}>
+												Sửa
+											</button>
 											<button
-												onClick={() => setSessions(sessions.filter((x) => x.id !== s.id))}
-												style={{ color: '#D93523', border: 'none', background: 'none', cursor: 'pointer' }}
+												style={{ ...styles.actionBtn, color: '#D93523' }}
+												onClick={() => setSessions(sessions.filter((x) => x !== s.id))}
 											>
 												Xóa
 											</button>
@@ -197,64 +320,71 @@ const QuanLyHocTap: React.FC = () => {
 					</div>
 				)}
 
-				{/* View: Danh mục môn học */}
-				{view === 'subjects' && (
-					<div>
-						<div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-							<input
-								style={styles.input}
-								placeholder='Thêm môn học mới...'
-								value={newSubName}
-								onChange={(e) => setNewSubName(e.target.value)}
-							/>
-							<button
-								style={styles.btnPrimary}
-								onClick={() => {
-									if (newSubName) setSubjects([...subjects, newSubName]);
-									setNewSubName('');
-								}}
-							>
-								THÊM
-							</button>
-						</div>
-						{subjects.map((s) => (
-							<div
-								key={s}
-								style={{
-									padding: '12px',
-									borderBottom: '1px solid #eee',
-									display: 'flex',
-									justifyContent: 'space-between',
-								}}
-							>
-								<span>{s}</span>
-								<span
-									style={{ color: '#D93523', cursor: 'pointer' }}
-									onClick={() => setSubjects(subjects.filter((x) => x !== s))}
-								>
-									Gỡ bỏ
-								</span>
-							</div>
-						))}
-					</div>
-				)}
-
-				{/* View: Mục tiêu */}
 				{view === 'goals' && (
 					<div>
 						<div style={styles.goalBox}>
-							<h3 style={{ margin: 0 }}>{isGoalAchieved ? 'ĐÃ HOÀN THÀNH MỤC TIÊU' : 'ĐANG THỰC HIỆN'}</h3>
+							<h3 style={{ margin: 0 }}>
+								{isGoalAchieved ? 'ĐÃ HOÀN THÀNH MỤC TIÊU TỔNG' : 'ĐANG THỰC HIỆN MỤC TIÊU'}
+							</h3>
 							<p style={{ fontSize: '24px', fontWeight: 'bold' }}>
 								{totalHours} / {monthlyGoal} GIỜ
 							</p>
 						</div>
-						<label>Điều chỉnh mục tiêu (giờ/tháng):</label>
-						<input
-							style={styles.input}
-							type='number'
-							value={monthlyGoal}
-							onChange={(e) => setMonthlyGoal(parseInt(e.target.value))}
-						/>
+
+						<div style={{ marginBottom: '30px' }}>
+							<label htmlFor='goalInput' style={{ fontWeight: 'bold' }}>
+								Điều chỉnh mục tiêu tổng (giờ/tháng):
+							</label>
+							<input
+								id='goalInput'
+								style={styles.input}
+								type='number'
+								value={monthlyGoal}
+								onChange={(e) => setMonthlyGoal(parseInt(e.target.value, 10))}
+							/>
+						</div>
+
+						<h3 style={{ borderLeft: '4px solid #D93523', paddingLeft: '10px', color: '#262626' }}>
+							PHÂN CHIA TIẾN ĐỘ THEO MÔN HỌC
+						</h3>
+						<table style={styles.table}>
+							<thead>
+								<tr>
+									<th style={styles.th}>Tên môn học</th>
+									<th style={styles.th}>Số giờ đã học</th>
+									<th style={styles.th}>Tỷ lệ đóng góp</th>
+									<th style={styles.th}>Trạng thái</th>
+								</tr>
+							</thead>
+							<tbody>
+								{subjects.map((sub) => {
+									const subMinutes = sessions.filter((s) => s.subject === sub).reduce((sum, s) => sum + s.duration, 0);
+									const subHours = (subMinutes / 60).toFixed(1);
+									const contribution =
+										parseFloat(totalHours) > 0 ? ((parseFloat(subHours) / parseFloat(totalHours)) * 100).toFixed(0) : 0;
+
+									return (
+										<tr key={sub}>
+											<td style={styles.td}>
+												<strong>{sub}</strong>
+											</td>
+											<td style={styles.td}>{subHours} giờ</td>
+											<td style={styles.td}>{contribution}%</td>
+											<td style={styles.td}>
+												<span
+													style={{
+														fontSize: '12px',
+														color: parseFloat(subHours) > 0 ? '#389e0d' : '#8c8c8c',
+													}}
+												>
+													{parseFloat(subHours) > 0 ? '● Có tiến triển' : '○ Chưa bắt đầu'}
+												</span>
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
 					</div>
 				)}
 			</div>
@@ -262,5 +392,4 @@ const QuanLyHocTap: React.FC = () => {
 	);
 };
 
-// ĐẢM BẢO DÒNG NÀY LUÔN Ở CUỐI CÙNG
 export default QuanLyHocTap;
