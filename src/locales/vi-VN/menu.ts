@@ -8,4 +8,8 @@ export default {
 
 	'menu.DanhMuc': 'Danh mục',
 	'menu.DanhMuc.ChucVu': 'Chức vụ',
+
+	'menu.DoanSo': 'Đoán số',
+
+	'menu.QuanLyHocTap': 'Quản lý học tập',
 };
