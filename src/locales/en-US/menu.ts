@@ -12,4 +12,6 @@ export default {
 	'menu.DoanSo': 'Đoán số',
 
 	'menu.QuanLyHocTap': 'Quản lý học tập',
+
+	'menu.chess': 'Chess',
 };

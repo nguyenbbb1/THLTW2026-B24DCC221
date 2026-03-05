@@ -54,7 +54,12 @@
 		component: './QuanLyHocTap',
 		icon: 'BookOutlined',
 	},
-
+	{
+		path: '/chess',
+		name: 'chess', // Đây là định danh (key) để tra cứu ngôn ngữ
+		icon: 'crown',
+		component: './Chess/chess',
+	},
 	// DANH MUC HE THONG
 	// {
 	// 	name: 'DanhMuc',
