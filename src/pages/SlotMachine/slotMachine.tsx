@@ -513,3 +513,8 @@ const styles: { [key: string]: React.CSSProperties } = {
 };
 
 export default SlotMachine;
+
+
+//khi sử dụng hết 10 lần miễn lãi, không thể vay thêm, cần chỉnh lại sao cho vẫn có thể vay thêm nhưng không reset lượt miễn lãi, và 5% lãi sẽ được tính dựa trên tổng nợ, tổng nợ là nợ cũ vẫn còn cộng với nợ mới và lãi sẽ được cộng vào nợ tổng luôn.
+
+//thưởng jackpot 3 diamonds đang quá cao, cần chỉnh lại về mức hợp lý hơn hoặc giảm tỷ lệ JACKPOT xuống 0.01% hoặc 0.001% để cân bằng lại trò chơi.
