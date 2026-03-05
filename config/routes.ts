@@ -56,9 +56,15 @@
 	},
 	{
 		path: '/chess',
-		name: 'chess', // Đây là định danh (key) để tra cứu ngôn ngữ
+		name: 'Chess',
 		icon: 'crown',
 		component: './Chess/chess',
+	},
+	{
+		path: '/slot-machine',
+		name: 'Slot Machine',
+		icon: 'CustomerServiceOutlined',
+		component: './SlotMachine/slotMachine',
 	},
 	// DANH MUC HE THONG
 	// {

@@ -14,4 +14,6 @@ export default {
 	'menu.QuanLyHocTap': 'Quản lý học tập',
 
 	'menu.chess': 'Chess',
+
+	'menu.slotMachine': 'Slot Machine',
 };
