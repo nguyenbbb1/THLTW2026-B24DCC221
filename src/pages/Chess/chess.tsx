@@ -2,20 +2,41 @@
 import React, { useState, useEffect } from 'react';
 import { Chess } from 'chess.js';
 import type { Square } from 'chess.js';
-import { Card, Button, Tag, Divider, Row, Col, message, Typography, Switch, Slider, Space, Modal } from 'antd';
+import { Card, Button, Tag, Divider, Row, Col, message, Typography, Switch, Slider, Space, Modal, Alert } from 'antd';
 import { ReloadOutlined, RobotOutlined, StockOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
 const ChessGame: React.FC = () => {
-	const [game, setGame] = useState(new Chess());
+	// Khởi tạo game từ localStorage nếu có, nếu không thì tạo mới
+	const [game, setGame] = useState(() => {
+		const savedFen = localStorage.getItem('chess_game_fen');
+		return savedFen ? new Chess(savedFen) : new Chess();
+	});
+
 	const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
-	const [moveHistory, setMoveHistory] = useState<string[]>([]);
+
+	const [moveHistory, setMoveHistory] = useState<string[]>(() => {
+		const savedHistory = localStorage.getItem('chess_game_history');
+		return savedHistory ? JSON.parse(savedHistory) : [];
+	});
+
 	const [possibleMoves, setPossibleMoves] = useState<Square[]>([]);
 	const [isAiThinking, setIsAiThinking] = useState(false);
-	const [aiEnabled, setAiEnabled] = useState(true);
-	const [elo, setElo] = useState(1500);
-	const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+
+	// Mặc định luôn là false (tắt bot) khi load trang
+	const [aiEnabled, setAiEnabled] = useState(false);
+
+	const [elo, setElo] = useState(() => {
+		const savedElo = localStorage.getItem('chess_game_elo');
+		return savedElo ? parseInt(savedElo, 10) : 1500;
+	});
+
+	const [lastMove, setLastMove] = useState(() => {
+		const savedLastMove = localStorage.getItem('chess_game_lastmove');
+		return savedLastMove ? JSON.parse(savedLastMove) : null;
+	});
+
 	const [promotionMove, setPromotionMove] = useState<{ from: Square; to: Square } | null>(null);
 
 	const PRIMARY_COLOR = '#D93523';
@@ -38,6 +59,78 @@ const ChessGame: React.FC = () => {
 
 	const pieceValues: Record<string, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
 
+	// [Bảng PST được giữ nguyên như bản cũ...]
+	const pst = {
+		p: [
+			[0, 0, 0, 0, 0, 0, 0, 0],
+			[50, 50, 50, 50, 50, 50, 50, 50],
+			[10, 10, 20, 30, 30, 20, 10, 10],
+			[5, 5, 10, 25, 25, 10, 5, 5],
+			[0, 0, 0, 20, 20, 0, 0, 0],
+			[5, -5, -10, 0, 0, -10, -5, 5],
+			[5, 10, 10, -20, -20, 10, 10, 5],
+			[0, 0, 0, 0, 0, 0, 0, 0],
+		],
+		n: [
+			[-50, -40, -30, -30, -30, -30, -40, -50],
+			[-40, -20, 0, 5, 5, 0, -20, -40],
+			[-30, 5, 10, 15, 15, 10, 5, -30],
+			[-30, 0, 15, 20, 20, 15, 0, -30],
+			[-30, 5, 15, 20, 20, 15, 5, -30],
+			[-30, 0, 10, 15, 15, 10, 0, -30],
+			[-40, -20, 0, 0, 0, 0, -20, -40],
+			[-50, -40, -30, -30, -30, -30, -40, -50],
+		],
+		b: [
+			[-20, -10, -10, -10, -10, -10, -10, -20],
+			[-10, 5, 0, 0, 0, 0, 5, -10],
+			[-10, 10, 10, 10, 10, 10, 10, -10],
+			[-10, 0, 10, 10, 10, 10, 0, -10],
+			[-10, 5, 5, 10, 10, 5, 5, -10],
+			[-10, 0, 5, 10, 10, 5, 0, -10],
+			[-10, 0, 0, 0, 0, 0, 0, -10],
+			[-20, -10, -10, -10, -10, -10, -10, -20],
+		],
+		r: [
+			[0, 0, 0, 5, 5, 0, 0, 0],
+			[5, 10, 10, 10, 10, 10, 10, 5],
+			[-5, 0, 0, 0, 0, 0, 0, -5],
+			[-5, 0, 0, 0, 0, 0, 0, -5],
+			[-5, 0, 0, 0, 0, 0, 0, -5],
+			[-5, 0, 0, 0, 0, 0, 0, -5],
+			[5, 10, 10, 10, 10, 10, 10, 5],
+			[0, 0, 0, 0, 0, 0, 0, 0],
+		],
+		q: [
+			[-20, -10, -10, -5, -5, -10, -10, -20],
+			[-10, 0, 0, 0, 0, 0, 0, -10],
+			[-10, 0, 5, 5, 5, 5, 0, -10],
+			[-5, 0, 5, 5, 5, 5, 0, -5],
+			[0, 0, 5, 5, 5, 5, 0, -5],
+			[-10, 5, 5, 5, 5, 5, 0, -10],
+			[-10, 0, 5, 0, 0, 0, 0, -10],
+			[-20, -10, -10, -5, -5, -10, -10, -20],
+		],
+		k: [
+			[20, 30, 10, 0, 0, 10, 30, 20],
+			[20, 20, 0, 0, 0, 0, 20, 20],
+			[-10, -20, -20, -20, -20, -20, -20, -10],
+			[-20, -30, -30, -40, -40, -30, -30, -20],
+			[-30, -40, -40, -50, -50, -40, -40, -30],
+			[-30, -40, -40, -50, -50, -40, -40, -30],
+			[-30, -40, -40, -50, -50, -40, -40, -30],
+			[-30, -40, -40, -50, -50, -40, -40, -30],
+		],
+	};
+
+	// Tự động lưu trạng thái khi có thay đổi
+	useEffect(() => {
+		localStorage.setItem('chess_game_fen', game.fen());
+		localStorage.setItem('chess_game_history', JSON.stringify(moveHistory));
+		localStorage.setItem('chess_game_elo', elo.toString());
+		localStorage.setItem('chess_game_lastmove', JSON.stringify(lastMove));
+	}, [game, moveHistory, elo, lastMove]);
+
 	const evaluateBoard = (gameInstance: Chess) => {
 		let totalEvaluation = 0;
 		const board = gameInstance.board();
@@ -45,7 +138,11 @@ const ChessGame: React.FC = () => {
 			for (let j = 0; j < 8; j += 1) {
 				const piece = board[i][j];
 				if (piece) {
-					const value = pieceValues[piece.type] || 0;
+					let value = pieceValues[piece.type] || 0;
+					if (pst[piece.type]) {
+						const posValue = piece.color === 'w' ? pst[piece.type][7 - i][j] : pst[piece.type][i][j];
+						value += posValue;
+					}
 					totalEvaluation += piece.color === 'w' ? -value : value;
 				}
 			}
@@ -58,33 +155,27 @@ const ChessGame: React.FC = () => {
 		depth: number,
 		alphaParam: number,
 		betaParam: number,
-		isMaximizingPlayer: boolean,
+		isMaximizing: boolean,
 	) => {
 		if (depth === 0) return -evaluateBoard(gameInstance);
-
 		const moves = gameInstance.moves();
 		let currentAlpha = alphaParam;
 		let currentBeta = betaParam;
-
-		if (isMaximizingPlayer) {
+		if (isMaximizing) {
 			let bestEval = -99999;
 			for (const move of moves) {
 				gameInstance.move(move);
-				bestEval = Math.max(
-					bestEval,
-					alphaBeta(gameInstance, depth - 1, currentAlpha, currentBeta, !isMaximizingPlayer),
-				);
+				bestEval = Math.max(bestEval, alphaBeta(gameInstance, depth - 1, currentAlpha, currentBeta, false));
 				gameInstance.undo();
 				currentAlpha = Math.max(currentAlpha, bestEval);
 				if (currentBeta <= currentAlpha) break;
 			}
 			return bestEval;
 		}
-
 		let bestEval = 99999;
 		for (const move of moves) {
 			gameInstance.move(move);
-			bestEval = Math.min(bestEval, alphaBeta(gameInstance, depth - 1, currentAlpha, currentBeta, !isMaximizingPlayer));
+			bestEval = Math.min(bestEval, alphaBeta(gameInstance, depth - 1, currentAlpha, currentBeta, true));
 			gameInstance.undo();
 			currentBeta = Math.min(currentBeta, bestEval);
 			if (currentBeta <= currentAlpha) break;
@@ -92,59 +183,47 @@ const ChessGame: React.FC = () => {
 		return bestEval;
 	};
 
+	const checkGameOver = (gameInstance: Chess) => {
+		if (gameInstance.game_over()) {
+			if (gameInstance.in_checkmate()) message.error('CHIẾU HẾT!');
+			else if (gameInstance.in_draw()) message.info('HÒA THEO LUẬT FIDE');
+		}
+	};
+
 	const makeAiMove = () => {
 		const possibleMovesList = game.moves({ verbose: true });
 		if (game.game_over() || possibleMovesList.length === 0) return;
-		let moveToDo = null;
-		if (elo < 600) {
-			moveToDo = possibleMovesList[Math.floor(Math.random() * possibleMovesList.length)];
-		} else {
-			let bestValue = -99999;
-			let bestMove = possibleMovesList[0];
-			const depth = elo >= 2500 ? 4 : elo >= 1800 ? 3 : elo >= 1200 ? 2 : 1;
-			for (const move of possibleMovesList) {
-				game.move(move);
-				const boardValue = alphaBeta(game, depth - 1, -100000, 100000, false);
-				game.undo();
-				if (boardValue > bestValue) {
-					bestValue = boardValue;
-					bestMove = move;
-				}
+		let bestValue = -99999;
+		let bestMoves = [];
+		const depth = elo >= 2500 ? 4 : elo >= 1800 ? 3 : elo >= 1200 ? 2 : 1;
+		for (const move of possibleMovesList) {
+			game.move(move);
+			const boardValue = alphaBeta(game, depth - 1, -100000, 100000, false);
+			game.undo();
+			if (boardValue > bestValue) {
+				bestValue = boardValue;
+				bestMoves = [move];
+			} else if (boardValue === bestValue) {
+				bestMoves.push(move);
 			}
-			moveToDo = bestMove;
 		}
+		const moveToDo = bestMoves[Math.floor(Math.random() * bestMoves.length)];
 		const finalGame = new Chess(game.fen());
 		finalGame.move(moveToDo);
 		setLastMove({ from: moveToDo.from, to: moveToDo.to });
 		setGame(finalGame);
 		setMoveHistory((prev) => [...prev, moveToDo.san]);
 		setIsAiThinking(false);
+		checkGameOver(finalGame);
 	};
 
 	useEffect(() => {
 		if (aiEnabled && game.turn() === 'b' && !game.game_over() && !promotionMove) {
 			setIsAiThinking(true);
-			const timer = setTimeout(makeAiMove, 500);
+			const timer = setTimeout(makeAiMove, 600);
 			return () => clearTimeout(timer);
 		}
 	}, [game, aiEnabled, promotionMove]);
-
-	const handleMove = (from: Square, to: Square, promotion: string = 'q') => {
-		const gameCopy = new Chess(game.fen());
-		try {
-			const move = gameCopy.move({ from, to, promotion });
-			if (move) {
-				setLastMove({ from: move.from, to: move.to });
-				setGame(gameCopy);
-				setMoveHistory((prev) => [...prev, move.san]);
-				if (gameCopy.in_checkmate()) message.error('CHIẾU HẾT!');
-				return true;
-			}
-		} catch (e) {
-			return false;
-		}
-		return false;
-	};
 
 	const onSquareClick = (square: Square) => {
 		if (game.game_over() || isAiThinking || promotionMove) return;
@@ -159,11 +238,19 @@ const ChessGame: React.FC = () => {
 			const isPromotion =
 				piece?.type === 'p' &&
 				((piece.color === 'w' && square[1] === '8') || (piece.color === 'b' && square[1] === '1'));
-
 			if (isPromotion && game.moves({ square: selectedSquare, verbose: true }).some((m) => m.to === square)) {
 				setPromotionMove({ from: selectedSquare, to: square });
 			} else {
-				handleMove(selectedSquare, square);
+				const gameCopy = new Chess(game.fen());
+				try {
+					const move = gameCopy.move({ from: selectedSquare, to: square, promotion: 'q' });
+					if (move) {
+						setLastMove({ from: move.from, to: move.to });
+						setGame(gameCopy);
+						setMoveHistory((prev) => [...prev, move.san]);
+						checkGameOver(gameCopy);
+					}
+				} catch (e) {}
 			}
 			setSelectedSquare(null);
 			setPossibleMoves([]);
@@ -181,9 +268,9 @@ const ChessGame: React.FC = () => {
 				const piece = game.get(squarePos);
 				const isDark = (i + j) % 2 !== 0;
 				const isPossibleMove = possibleMoves.includes(squarePos);
-				const highlightCheck = isCheck && piece?.type === 'k' && piece?.color === game.turn();
 				const isSelected = selectedSquare === squarePos;
 				const isLastMoveSquare = lastMove && (lastMove.from === squarePos || lastMove.to === squarePos);
+				const highlightCheck = isCheck && piece?.type === 'k' && piece?.color === game.turn();
 
 				board.push(
 					<div
@@ -209,8 +296,8 @@ const ChessGame: React.FC = () => {
 							<div
 								style={{
 									position: 'absolute',
-									width: '90%',
-									height: '90%',
+									width: '100%',
+									height: '100%',
 									backgroundColor: HIGHLIGHT_MOVE_COLOR,
 									zIndex: 1,
 									pointerEvents: 'none',
@@ -221,8 +308,8 @@ const ChessGame: React.FC = () => {
 							<div
 								style={{
 									position: 'absolute',
-									width: piece ? '90%' : '25%',
-									height: piece ? '90%' : '25%',
+									width: piece ? '100%' : '25%',
+									height: piece ? '100%' : '25%',
 									border: piece ? '4px solid rgba(0,0,0,0.15)' : 'none',
 									borderRadius: piece ? '0' : '50%',
 									backgroundColor: piece ? 'transparent' : 'rgba(0,0,0,0.1)',
@@ -241,14 +328,6 @@ const ChessGame: React.FC = () => {
 			}
 		}
 		return board;
-	};
-
-	const getEloRank = (value: number) => {
-		if (value < 1200) return 'Người mới (Novice)';
-		if (value < 1600) return 'Trung cấp (Intermediate)';
-		if (value < 2000) return 'Nâng cao (Advanced)';
-		if (value < 2400) return 'Kiện tướng (Master)';
-		return 'Đại kiện tướng (Grandmaster)';
 	};
 
 	return (
@@ -298,6 +377,17 @@ const ChessGame: React.FC = () => {
 							)}
 						</div>
 
+						{/* Thông báo cảnh báo AI khi bật */}
+						{aiEnabled && (
+							<Alert
+								message='Cảnh báo chế độ AI'
+								description='Chế độ Stockfish Web đang được phát triển, tính toán có thể chưa hoàn thiện.'
+								type='warning'
+								showIcon
+								style={{ marginBottom: '16px' }}
+							/>
+						)}
+
 						<Space
 							direction='vertical'
 							style={{ width: '100%', background: '#f9f9f9', padding: '15px', borderRadius: '4px' }}
@@ -306,14 +396,17 @@ const ChessGame: React.FC = () => {
 								<Text strong>
 									<RobotOutlined /> Stockfish AI
 								</Text>
-								<Switch checked={aiEnabled} onChange={setAiEnabled} />
+								<Switch
+									checked={aiEnabled}
+									onChange={(val) => {
+										setAiEnabled(val);
+										if (val) message.warning('Lưu ý: Chế độ AI hiện chưa hoàn thiện!');
+									}}
+								/>
 							</div>
 							<Divider style={{ margin: '10px 0' }} />
 							<Text strong>
 								<StockOutlined /> TRÌNH ĐỘ: {elo} ELO
-							</Text>
-							<Text type='secondary' style={{ display: 'block', fontSize: '12px' }}>
-								{getEloRank(elo)}
 							</Text>
 							<Slider
 								min={400}
@@ -326,7 +419,6 @@ const ChessGame: React.FC = () => {
 								handleStyle={{ borderColor: PRIMARY_COLOR }}
 							/>
 						</Space>
-
 						<Divider orientation='left'>LỊCH SỬ</Divider>
 						<div
 							style={{
@@ -353,10 +445,15 @@ const ChessGame: React.FC = () => {
 							size='large'
 							icon={<ReloadOutlined />}
 							onClick={() => {
-								setGame(new Chess());
+								const newGame = new Chess();
+								setGame(newGame);
 								setMoveHistory([]);
 								setLastMove(null);
 								setPromotionMove(null);
+								// Xóa dữ liệu cũ trong storage
+								localStorage.removeItem('chess_game_fen');
+								localStorage.removeItem('chess_game_history');
+								localStorage.removeItem('chess_game_lastmove');
 							}}
 							style={{ backgroundColor: PRIMARY_COLOR, color: '#fff', fontWeight: 'bold', borderRadius: 0 }}
 						>
@@ -377,8 +474,14 @@ const ChessGame: React.FC = () => {
 						<Button
 							key={p.key}
 							onClick={() => {
-								handleMove(promotionMove.from, promotionMove.to, p.key);
-								setPromotionMove(null);
+								const gameCopy = new Chess(game.fen());
+								const move = gameCopy.move({ from: promotionMove.from, to: promotionMove.to, promotion: p.key });
+								if (move) {
+									setLastMove({ from: move.from, to: move.to });
+									setGame(gameCopy);
+									setMoveHistory((prev) => [...prev, move.san]);
+									setPromotionMove(null);
+								}
 							}}
 							style={{
 								height: '60px',
