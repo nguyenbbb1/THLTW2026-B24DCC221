@@ -8,7 +8,6 @@ import { ReloadOutlined, RobotOutlined, StockOutlined } from '@ant-design/icons'
 const { Text } = Typography;
 
 const ChessGame: React.FC = () => {
-	// Khởi tạo game từ localStorage nếu có, nếu không thì tạo mới
 	const [game, setGame] = useState(() => {
 		const savedFen = localStorage.getItem('chess_game_fen');
 		return savedFen ? new Chess(savedFen) : new Chess();
@@ -24,7 +23,6 @@ const ChessGame: React.FC = () => {
 	const [possibleMoves, setPossibleMoves] = useState<Square[]>([]);
 	const [isAiThinking, setIsAiThinking] = useState(false);
 
-	// Mặc định luôn là false (tắt bot) khi load trang
 	const [aiEnabled, setAiEnabled] = useState(false);
 
 	const [elo, setElo] = useState(() => {
@@ -59,7 +57,6 @@ const ChessGame: React.FC = () => {
 
 	const pieceValues: Record<string, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
 
-	// [Bảng PST được giữ nguyên như bản cũ...]
 	const pst = {
 		p: [
 			[0, 0, 0, 0, 0, 0, 0, 0],
@@ -123,7 +120,6 @@ const ChessGame: React.FC = () => {
 		],
 	};
 
-	// Tự động lưu trạng thái khi có thay đổi
 	useEffect(() => {
 		localStorage.setItem('chess_game_fen', game.fen());
 		localStorage.setItem('chess_game_history', JSON.stringify(moveHistory));
@@ -377,11 +373,10 @@ const ChessGame: React.FC = () => {
 							)}
 						</div>
 
-						{/* Thông báo cảnh báo AI khi bật */}
 						{aiEnabled && (
 							<Alert
 								message='Cảnh báo chế độ AI'
-								description='Chế độ Stockfish Web đang được phát triển, tính toán có thể chưa hoàn thiện.'
+								description='Chế độ Stockfish AI đang được phát triển, tính toán có thể chưa hoàn thiện.'
 								type='warning'
 								showIcon
 								style={{ marginBottom: '16px' }}
@@ -450,7 +445,6 @@ const ChessGame: React.FC = () => {
 								setMoveHistory([]);
 								setLastMove(null);
 								setPromotionMove(null);
-								// Xóa dữ liệu cũ trong storage
 								localStorage.removeItem('chess_game_fen');
 								localStorage.removeItem('chess_game_history');
 								localStorage.removeItem('chess_game_lastmove');
@@ -503,3 +497,11 @@ const ChessGame: React.FC = () => {
 };
 
 export default ChessGame;
+
+//khi nhấn từ quân cờ này sang quân cờ khác không thể nhấn 1 lần chuyển sang quân cờ khác ngay được mà phải nhấn lại lần nữa vào quân cờ đó mới có thể chuyển sang quân cờ khác được, nếu không sẽ bị lỗi khi nhấn vào ô khác để đi quân cờ đó đi.
+//ví dụ: nhấn vào quân tốt, sau đó nhấn vào quân mã, lúc này quân mã sẽ được chọn nhưng nếu nhấn vào ô khác để đi quân mã thì sẽ bị lỗi, phải nhấn lại vào quân mã thì mới có thể đi được.
+
+//chưa có tính năng xem lại nước đi nên khi đi sai nước sẽ không thể quay lại được, phải chơi lại từ đầu, chưa có nút undo để quay lại nước đi trước đó.
+//chưa thể nhấn vào lịch sử để xem lại nước đi trong quá khứ, chưa có tính năng xem lại nước đi trong lịch sử.
+
+//bot AI còn nhiều lỗi về tính toán nước đi, các nước đi bị dập khuân theo logic, chưa có tính năng đánh giá nước đi tốt hay xấu, chưa có tính năng gợi ý nước đi tốt nhất, chưa có tính năng phân tích ván đấu sau khi kết thúc để xem những nước đi sai lầm.
