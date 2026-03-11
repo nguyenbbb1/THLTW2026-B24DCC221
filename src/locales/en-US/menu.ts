@@ -16,4 +16,8 @@ export default {
 	'menu.chess': 'Chess',
 
 	'menu.slotMachine': 'Slot Machine',
+
+	'menu.keoBuaBao': 'Kéo Búa bao',
+
+	'menu.nganHangCauHoi': 'Ngân hàng câu hỏi',
 };

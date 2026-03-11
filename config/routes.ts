@@ -61,11 +61,23 @@
 		component: './Chess/chess',
 	},
 	{
-		path: '/slot-machine',
-		name: 'Slot Machine',
-		icon: 'CustomerServiceOutlined',
-		component: './SlotMachine/slotMachine',
-	},
+        path: '/slot-machine',
+        name: 'Slot Machine',
+        icon: 'SlidersOutlined',
+        component: './SlotMachine/slotMachine',
+    },
+    {
+        path: '/keo-bua-bao',
+        name: 'Kéo Búa Bao',
+        icon: 'PlayCircleOutlined',
+        component: './KeoBuaBao', 
+    },
+    {
+        path: '/ngan-hang-cau-hoi',
+        name: 'Ngân hàng câu hỏi',
+        icon: 'UnorderedListOutlined',
+        component: './NganHangCauHoi',
+    },
 	// DANH MUC HE THONG
 	// {
 	// 	name: 'DanhMuc',
