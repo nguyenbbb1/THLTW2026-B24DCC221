@@ -20,4 +20,6 @@ export default {
 	'menu.keoBuaBao': 'Kéo Búa bao',
 
 	'menu.nganHangCauHoi': 'Ngân hàng câu hỏi',
+
+	'menu.nganHangCauHoi': 'Quản lý lịch hẹn',
 };

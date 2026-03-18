@@ -78,6 +78,12 @@
         icon: 'UnorderedListOutlined',
         component: './NganHangCauHoi',
     },
+	{
+		path: '/quan-ly-lich-hen',
+		name: 'nganHangCauHoi',
+		icon: 'CalendarOutlined',
+		component: './QuanLyLichHen',
+	},
 	// DANH MUC HE THONG
 	// {
 	// 	name: 'DanhMuc',
