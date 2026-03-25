@@ -22,4 +22,11 @@ export default {
 	'menu.nganHangCauHoi': 'Ngân hàng câu hỏi',
 
 	'menu.nganHangCauHoi': 'Quản lý lịch hẹn',
+
+    'menu.quanLyVanBang': 'Quản lý văn bằng tốt nghiệp',
+    'menu.quanLyVanBang.quanLySoVanBang': 'Quản lý sổ gốc',
+    'menu.quanLyVanBang.quanLyQuyetDinh': 'Quản lý quyết định',
+    'menu.quanLyVanBang.cauHinhBieuMau': 'Cấu hình biểu mẫu',
+    'menu.quanLyVanBang.capPhatVanBang': 'Cấp phát văn bằng',
+    'menu.traCuuVanBang': 'Tra cứu văn bằng',
 };

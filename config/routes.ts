@@ -84,6 +84,20 @@
 		icon: 'CalendarOutlined',
 		component: './QuanLyLichHen',
 	},
+
+	{
+        path: '/quan-ly-lich-hen',
+        name: 'nganHangCauHoi',
+        icon: 'CalendarOutlined',
+        component: './QuanLyLichHen',
+    },
+	{
+        path: '/quan-ly-van-bang',
+        name: 'quanLyVanBang',
+        icon: 'BookOutlined',
+        component: './QuanLySoVanBangTotNghiep',
+    },
+
 	// DANH MUC HE THONG
 	// {
 	// 	name: 'DanhMuc',
