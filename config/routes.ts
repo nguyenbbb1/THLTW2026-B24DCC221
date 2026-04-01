@@ -97,6 +97,12 @@
         icon: 'BookOutlined',
         component: './QuanLySoVanBangTotNghiep',
     },
+	{
+        path: '/quan-ly-cau-lac-bo',
+        name: 'quanLyCauLacBo',
+        icon: 'TeamOutlined', 
+        component: './QuanLyCauLacBo',
+    },
 
 	// DANH MUC HE THONG
 	// {

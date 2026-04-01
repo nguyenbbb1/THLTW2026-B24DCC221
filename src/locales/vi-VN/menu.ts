@@ -29,4 +29,5 @@ export default {
     'menu.quanLyVanBang.cauHinhBieuMau': 'Cấu hình biểu mẫu',
     'menu.quanLyVanBang.capPhatVanBang': 'Cấp phát văn bằng',
     'menu.traCuuVanBang': 'Tra cứu văn bằng',
+	'menu.quanLyCauLacBo': 'Quản lý câu lạc bộ',
 };
