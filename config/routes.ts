@@ -103,6 +103,12 @@
         icon: 'TeamOutlined', 
         component: './QuanLyCauLacBo',
     },
+	{
+    path: '/lap-ke-hoach-du-lich',
+    name: 'lapKeHoachDuLich',
+    icon: 'ScheduleOutlined', 
+    component: './LapKeHoachDuLich',
+},
 
 	// DANH MUC HE THONG
 	// {
