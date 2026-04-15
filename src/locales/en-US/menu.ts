@@ -23,12 +23,13 @@ export default {
 
 	'menu.nganHangCauHoi': 'Quản lý lịch hẹn',
 
-    'menu.quanLyVanBang': 'Quản lý văn bằng tốt nghiệp',
-    'menu.quanLyVanBang.quanLySoVanBang': 'Quản lý sổ gốc',
-    'menu.quanLyVanBang.quanLyQuyetDinh': 'Quản lý quyết định',
-    'menu.quanLyVanBang.cauHinhBieuMau': 'Cấu hình biểu mẫu',
-    'menu.quanLyVanBang.capPhatVanBang': 'Cấp phát văn bằng',
-    'menu.traCuuVanBang': 'Tra cứu văn bằng',
+	'menu.quanLyVanBang': 'Quản lý VB tốt nghiệp',
+	'menu.quanLyVanBang.quanLySoVanBang': 'Quản lý sổ gốc',
+	'menu.quanLyVanBang.quanLyQuyetDinh': 'Quản lý quyết định',
+	'menu.quanLyVanBang.cauHinhBieuMau': 'Cấu hình biểu mẫu',
+	'menu.quanLyVanBang.capPhatVanBang': 'Cấp phát văn bằng',
+	'menu.traCuuVanBang': 'Tra cứu văn bằng',
 	'menu.quanLyCauLacBo': 'Quản lý câu lạc bộ',
 	'menu.lapKeHoachDuLich': 'Lập kế hoạch du lịch',
+	'menu.quanLyDonHang': 'Quản lý đơn hàng',
 };
