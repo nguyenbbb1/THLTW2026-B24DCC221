@@ -115,6 +115,12 @@
 		icon: 'ShoppingCartOutlined',
 		component: './QuanLyDonHang',
 	},
+	{
+		path: '/blog-ca-nhan',
+		name: 'blogCaNhan',
+		icon: 'ReadOutlined',
+		component: './BlogCaNhan',
+	},
 
 	// DANH MUC HE THONG
 	// {

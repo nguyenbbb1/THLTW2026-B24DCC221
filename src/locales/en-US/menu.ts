@@ -32,4 +32,5 @@ export default {
 	'menu.quanLyCauLacBo': 'Quản lý câu lạc bộ',
 	'menu.lapKeHoachDuLich': 'Lập kế hoạch du lịch',
 	'menu.quanLyDonHang': 'Quản lý đơn hàng',
+	'menu.blogCaNhan': 'Blog Cá nhân',
 };

@@ -8,6 +8,7 @@ import { initialOrders, mockCustomers } from './mockData';
 import { styles } from './SharedStyles';
 
 const QuanLyDonHang: React.FC = () => {
+  localStorage.clear();
   // Khởi tạo State từ LocalStorage, nếu không có thì lấy dữ liệu mẫu
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = localStorage.getItem('main_orders');

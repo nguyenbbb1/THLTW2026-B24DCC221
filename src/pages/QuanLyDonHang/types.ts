@@ -11,12 +11,16 @@ export interface Product {
   price: number;
 }
 
+export interface OrderItem {
+  product: Product;
+  quantity: number;
+}
+
 export interface Order {
   id: string;
   customerId: string;
   orderDate: string;
-  products: Product[];
+  items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
-  quantity: number;
 }
