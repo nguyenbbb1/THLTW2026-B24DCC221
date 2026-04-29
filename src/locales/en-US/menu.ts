@@ -33,4 +33,5 @@ export default {
 	'menu.lapKeHoachDuLich': 'Lập kế hoạch du lịch',
 	'menu.quanLyDonHang': 'Quản lý đơn hàng',
 	'menu.blogCaNhan': 'Blog Cá nhân',
+	'menu.theoDoiSucKhoe': 'Theo dõi sức khỏe',
 };

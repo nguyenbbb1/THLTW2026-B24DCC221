@@ -15,7 +15,6 @@ import { Post, Tag } from './types';
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 
-// Khóa lưu trữ trong LocalStorage
 const STORAGE_KEYS = {
   POSTS: 'blog_posts_data',
   TAGS: 'blog_tags_data',
@@ -25,14 +24,13 @@ const BlogApp: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string>('home');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
-  // --- Khởi tạo State với Local Storage ---
   const [posts, setPosts] = useState<Post[]>(() => {
     try {
       const savedPosts = localStorage.getItem(STORAGE_KEYS.POSTS);
       return savedPosts ? JSON.parse(savedPosts) : mockPosts;
     } catch (error) {
       console.error("Lỗi khi đọc dữ liệu Posts từ Local Storage:", error);
-      return mockPosts; // Fallback an toàn nếu chuỗi JSON bị hỏng
+      return mockPosts;
     }
   });
 
@@ -46,9 +44,8 @@ const BlogApp: React.FC = () => {
     }
   });
 
-  const author = mockAuthor; // Giữ nguyên dữ liệu tác giả (thường là tĩnh)
+  const author = mockAuthor;
 
-  // --- Đồng bộ hóa State xuống Local Storage ---
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
   }, [posts]);
@@ -57,7 +54,6 @@ const BlogApp: React.FC = () => {
     localStorage.setItem(STORAGE_KEYS.TAGS, JSON.stringify(tags));
   }, [tags]);
 
-  // --- Handlers cho Bài Viết ---
   const handleViewPost = (id: string) => {
     setSelectedPostId(id);
     setActiveMenu('detail');
@@ -86,7 +82,6 @@ const BlogApp: React.FC = () => {
     setPosts(prev => prev.filter(p => p.id !== id));
   };
 
-  // --- Handlers cho Thẻ ---
   const handleAddTag = (name: string) => {
     setTags([...tags, { id: `t${Date.now()}`, name, count: 0 }]);
   };
@@ -99,7 +94,6 @@ const BlogApp: React.FC = () => {
     setTags(prev => prev.filter(t => t.id !== id));
   };
 
-  // --- Logic render nội dung động ---
   const renderContent = () => {
     if (activeMenu === 'detail' && selectedPostId) {
       const currentPost = posts.find(p => p.id === selectedPostId);
@@ -124,7 +118,6 @@ const BlogApp: React.FC = () => {
       case 'manage-posts':
         return <QuanLyBaiViet posts={posts} tags={tags} onAddPost={handleAddPost} onEditPost={handleEditPost} onDeletePost={handleDeletePost} />;
       case 'manage-tags':
-        // Cập nhật count tag trực tiếp dựa trên số bài viết đang có
         const updatedTags = tags.map(tag => ({
           ...tag,
           count: posts.filter(p => p.tags.includes(tag.name)).length

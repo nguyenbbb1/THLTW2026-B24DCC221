@@ -121,6 +121,12 @@
 		icon: 'ReadOutlined',
 		component: './BlogCaNhan',
 	},
+	{
+    path: '/theo-doi-suc-khoe',
+    name: 'theoDoiSucKhoe',
+    icon: 'HeartOutlined',
+    component: './TheoDoiSucKhoe',
+  },
 
 	// DANH MUC HE THONG
 	// {
