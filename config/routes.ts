@@ -127,6 +127,12 @@
     icon: 'HeartOutlined',
     component: './TheoDoiSucKhoe',
   },
+	{
+    path: '/theo-doi-cong-viec',
+    name: 'theoDoiCongViec',
+    icon: 'CheckSquareOutlined',
+    component: './TheoDoiCongViec',
+  },
 
 	// DANH MUC HE THONG
 	// {
